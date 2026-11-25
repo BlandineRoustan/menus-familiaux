@@ -140,7 +140,9 @@ main { max-width: 1180px; margin: 0 auto; padding: 16px; }
   text-align: left; background: none; border: 1px solid transparent; border-radius: 10px; padding: 7px 8px;
 }
 .repas:hover { background: rgba(31, 77, 58, .06); }
-.repas-nom { flex: 0 0 38px; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--texte-doux); font-weight: 600; }
+.repas-tete { flex: 0 0 auto; min-width: 38px; max-width: 96px; display: flex; flex-direction: column; gap: 1px; }
+.repas-tete .note { font-size: .72rem; line-height: 1.2; }
+.repas-nom { flex: none; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--texte-doux); font-weight: 600; }
 .repas-contenu { display: flex; flex-wrap: wrap; gap: 5px; align-items: baseline; min-width: 0; }
 /* Un mets, coloré selon le service : entrée (moutarde), plat (sapin), salade (vert tendre), dessert (rose poudré). */
 .mets { background: var(--fond-s); color: var(--texte-s); padding: 2px 10px; border-radius: 999px; font-weight: 500; border: 1px solid transparent; }
@@ -176,6 +178,7 @@ main { max-width: 1180px; margin: 0 auto; padding: 16px; }
 .mois .jour-tete .badge { font-size: .65rem; padding: 1px 6px; }
 .mois .jour-repas { gap: 0; }
 .mois .repas { padding: 4px 6px; font-size: .92rem; }
+.mois .repas-tete { flex-direction: row; align-items: baseline; gap: 5px; max-width: none; }
 .mois .repas.facultatif.vide { display: none; }
 /* Midi facultatif révélé au survol, seulement avec une souris : sur téléphone, le toucher « survole »
    le jour, le midi apparaît sous le doigt et c'est lui qui recevait le clic au lieu du soir. */
@@ -190,10 +193,10 @@ main { max-width: 1180px; margin: 0 auto; padding: 16px; }
   .mois .repas { flex-direction: column; gap: 2px; }
   .mois .repas-nom { flex: none; font-size: .68rem; }
   .mois .repas.facultatif.vide { display: flex; visibility: hidden; }
-  .mois .jour:hover .repas.facultatif.vide { visibility: visible; }
+  .mois .repas-contenu .mets { padding: 1px 8px; font-size: .88rem; }
 }
 @media (min-width: 900px) and (hover: hover) {
-  .mois .repas-contenu .mets { padding: 1px 8px; font-size: .88rem; }
+  .mois .jour:hover .repas.facultatif.vide { visibility: visible; }
 }
 
 /* ---------- Feuille (éditeur) ---------- */
@@ -270,7 +273,7 @@ main { max-width: 1180px; margin: 0 auto; padding: 16px; }
 .notes-rapides { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .puce-note { border: 1px solid var(--bord); background: #fff; border-radius: 999px; padding: 5px 12px; font-size: .9rem; color: var(--texte-doux); }
 .puce-note.actif { background: var(--orange-doux); border-color: var(--orange-doux); color: #4a2410; }
-.note-libre { flex: 1 1 100%; }
+.note-libre { flex: 1 1 160px; padding-top: 6px; padding-bottom: 6px; }
 
 .historique h3 { margin: 0 0 6px; font-size: .95rem; color: var(--sapin); }
 .historique ul { margin: 0; padding-left: 18px; max-height: 30vh; overflow-y: auto; color: var(--texte-doux); }

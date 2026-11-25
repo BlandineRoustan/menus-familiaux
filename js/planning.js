@@ -111,10 +111,10 @@ function cellule(iso, cle, info, ouvrir) {
   return el(`button.repas.${cle}` + (facultatif ? '.facultatif' : '') + (vide ? '.vide' : ''), {
     type: 'button', onclick: () => ouvrir(iso, cle), 'aria-label': `${dateLongue(iso)}, ${cle}`
   },
-    el('span.repas-nom', cle === 'midi' ? 'Midi' : 'Soir'),
+    // La note (« Restes »…) accompagne l'étiquette : dessous en vue semaine, à côté en vue 4 semaines.
+    el('span.repas-tete', el('span.repas-nom', cle === 'midi' ? 'Midi' : 'Soir'), rep.note ? el('span.note', rep.note) : null),
     el('span.repas-contenu',
       plats,
-      rep.note ? el('span.note', rep.note) : null,
       vide ? el('span.a-prevoir', facultatif ? '' : 'à prévoir') : null,
       alertes(iso, cle).map(x => el('span.alerte', { title: x.titre }, x.texte))
     )
@@ -355,12 +355,12 @@ function editer(iso, cle, rafraichir) {
         el('div.bascule.large', { role: 'group' }, D.REPAS.map(({ id, nom }) => el('button' + (id === repas ? '.actif' : ''), {
           type: 'button', onclick: () => { repas = id; dessiner(); }
         }, nom))),
+        notes,
         choisis,
         restes,
         equilibre,
         recherche,
         liste,
-        notes,
         el('footer.feuille-pied', el('button.principal', { type: 'button', onclick: fermer }, 'Fermer'))
       ].filter(Boolean));
       if (focus && surOrdi) recherche.focus(); // (à l'ouverture, c'est « autofocus » qui joue)

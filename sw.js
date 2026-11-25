@@ -1,5 +1,5 @@
 // Nom du cache : le changer vide l'ancien cache (utile si un fichier y est resté coincé).
-const V = 'menus-v9';
+const V = 'menus-v11';
 const CORE = [
   './', 'index.html', 'manifest.json', 'css/style.css',
   'js/app.js', 'js/dates.js', 'js/donnees.js', 'js/calendrier.js', 'js/github.js',
