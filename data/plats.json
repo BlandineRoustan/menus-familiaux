@@ -2,7 +2,19 @@
   "format": 1,
   "plats": [
     {"id":"bourguignon","nom":"Bourguignon","ingredients":[],"maj":"2026-11-25T00:00:00.000Z"},
+    {"id":"chili-con-carne","nom":"Chili con carne","ingredients":[],"maj":"2026-11-25T11:04:19.416Z"},
+    {"id":"chou-fleur-a-la-flamande","nom":"Chou fleur à la flamande","ingredients":[],"maj":"2026-11-25T11:00:23.254Z"},
+    {"id":"filet-mignon-miel-thym-pommes","nom":"Filet mignon (miel, thym, pommes)","ingredients":[],"maj":"2026-11-25T11:02:10.828Z"},
+    {"id":"fromage","nom":"Fromage","ingredients":[],"maj":"2026-11-25T11:03:20.866Z"},
+    {"id":"gougere","nom":"Gougère","ingredients":[],"maj":"2026-11-25T11:03:38.179Z"},
     {"id":"hachis-parmentier","nom":"Hachis parmentier","ingredients":[],"maj":"2026-11-25T10:16:59.708Z"},
-    {"id":"pates-carbo","nom":"Pâtes carbo","ingredients":[],"maj":"2026-11-25T00:00:00.000Z"}
+    {"id":"haricots","nom":"Haricots","ingredients":[],"maj":"2026-11-25T11:02:41.629Z"},
+    {"id":"ufs-a-la-coque","nom":"Œufs à la coque","ingredients":[],"maj":"2026-11-25T11:03:06.576Z"},
+    {"id":"pates-carbo","nom":"Pâtes carbo","ingredients":[],"maj":"2026-11-25T00:00:00.000Z"},
+    {"id":"pizza-blanche-lardons-raclette","nom":"Pizza (blanche, lardons, raclette)","ingredients":[],"maj":"2026-11-25T11:01:34.551Z"},
+    {"id":"pizza-jambon-fromages","nom":"Pizza (jambon, fromages)","ingredients":[],"maj":"2026-11-25T11:01:18.142Z"},
+    {"id":"poireaux-lardons","nom":"Poireaux lardons","ingredients":[],"maj":"2026-11-25T11:04:01.054Z"},
+    {"id":"poulet-roti","nom":"Poulet rôti","ingredients":[],"maj":"2026-11-25T11:02:35.398Z"},
+    {"id":"sarrasin","nom":"Sarrasin","ingredients":[],"maj":"2026-11-25T11:02:15.713Z"}
   ]
 }

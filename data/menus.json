@@ -1,6 +1,11 @@
 {
   "format": 1,
   "jours": {
-    "2026-11-25": {"midi":{"plats":["hachis-parmentier"]},"maj":"2026-11-25T10:16:59.714Z"}
+    "2026-11-25": {"midi":{"plats":["hachis-parmentier"]},"soir":{"plats":["chou-fleur-a-la-flamande"]},"maj":"2026-11-25T11:00:12.152Z"},
+    "2026-11-26": {"soir":{"plats":["chili-con-carne"]},"maj":"2026-11-25T11:04:19.422Z"},
+    "2026-11-27": {"soir":{"plats":["pizza-jambon-fromages","pizza-blanche-lardons-raclette"]},"maj":"2026-11-25T11:01:34.555Z"},
+    "2026-11-28": {"midi":{"plats":["filet-mignon-miel-thym-pommes","sarrasin"]},"maj":"2026-11-25T11:02:15.716Z"},
+    "2026-11-29": {"midi":{"plats":["poulet-roti","haricots"]},"soir":{"plats":["ufs-a-la-coque"],"salades":["fromage"]},"maj":"2026-11-25T11:03:20.870Z"},
+    "2026-11-30": {"soir":{"plats":["gougere","poireaux-lardons"]},"maj":"2026-11-25T11:04:01.059Z"}
   }
 }
