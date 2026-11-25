@@ -279,3 +279,42 @@ main { max-width: 1180px; margin: 0 auto; padding: 16px; }
 #annonce.visible { opacity: 1; transform: translate(-50%, 0); }
 #annonce.erreur { background: #9a3c14; }
 @media (min-width: 800px) { #annonce { bottom: 24px; } }
+
+/* ---------- Ingrédients ---------- */
+.t-feculent { --fond-t: #f4e6d0; --texte-t: #8a5a1c; }
+.t-legume { --fond-t: #e2f1dc; --texte-t: #3d7a35; }
+.t-proteine { --fond-t: #f7dcd5; --texte-t: #9c3b28; }
+.t-proteine-vegetale { --fond-t: #ecefd5; --texte-t: #5f6a22; }
+.t-laitier { --fond-t: #e1e9f1; --texte-t: #46637f; }
+.t-fruit { --fond-t: #fbe3d4; --texte-t: #b44c22; }
+.t-autre { --fond-t: #ece7de; --texte-t: #6f6a60; }
+.ingr {
+  display: inline-flex; align-items: center; gap: 4px; border: 1px solid transparent; border-radius: 999px;
+  background: var(--fond-t, #ece7de); color: var(--texte-t, #6f6a60); padding: 3px 10px; font-size: .9rem; font-weight: 500;
+}
+.ingr button { border: 0; background: rgba(0, 0, 0, .08); color: inherit; width: 22px; height: 22px; border-radius: 50%; line-height: 1; padding: 0; }
+button.ingr, .ingr.cliquable { cursor: pointer; }
+button.ingr:hover, .ingr.cliquable:hover { border-color: var(--texte-t); }
+button.ingr.actif { background: var(--texte-t); color: #fff; }
+.pastille.t-feculent, .pastille.t-legume, .pastille.t-proteine, .pastille.t-proteine-vegetale,
+.pastille.t-laitier, .pastille.t-fruit, .pastille.t-autre { background: var(--texte-t); }
+.types-choix, .ingr-choisis, .ingr-propositions { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.ingredients-plat { display: flex; flex-direction: column; gap: 8px; }
+.ingr-propositions:empty { display: none; }
+.nouvel-ingr { display: flex; flex-direction: column; gap: 6px; width: 100%; padding: 8px 10px; border: 1px dashed var(--orange-doux); border-radius: 12px; background: var(--abricot); }
+.nouvel-ingr > span { color: var(--orange); font-weight: 600; font-size: .9rem; }
+.section-ingr h3 { margin: 0 0 6px; font-size: .95rem; color: var(--sapin); }
+.section-ingr h3 small { font-weight: 400; color: var(--texte-doux); }
+.barre-vue { margin-bottom: 12px; }
+.catalogue { display: flex; flex-direction: column; gap: 14px; margin-top: 4px; }
+.groupe-ingr h3 { display: flex; align-items: center; margin: 0 0 6px; font: 600 1rem var(--serif); color: var(--sapin); }
+.alerte { display: inline-block; font-size: .75rem; font-weight: 600; color: #9a4a1c; background: #fbe6d6; border-radius: 999px; padding: 1px 8px; }
+.alertes-repas { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; }
+.bilan { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: -4px 2px 12px; font-size: .85rem; }
+.semaine .bilan { margin: -2px 2px 8px; }
+.bilan-titre { color: var(--texte-doux); font-weight: 600; }
+.bilan-inconnu { color: var(--texte-doux); font-size: .78rem; font-style: italic; }
+.ingr.petit { font-size: .78rem; padding: 0 8px; }
+.ingr-idee { display: flex; flex-wrap: wrap; gap: 4px; }
+.ingr-idee .ingr { font-weight: 400; }
+.ingr-idee .ingr.trouve { border-color: var(--texte-t); font-weight: 600; }

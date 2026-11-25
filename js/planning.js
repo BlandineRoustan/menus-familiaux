@@ -44,6 +44,62 @@ export const legende = () => el('p.legende', { 'aria-hidden': 'true' },
   D.SERVICES.map(s => el(`span.mets.m-${s.id}`, s.nom)),
   el('span.mets.m-plat.repete', 'servi récemment'));
 
+// ---------- Équilibre (d'après les ingrédients des idées, s'ils sont renseignés) ----------
+const ORDRE = D.REPAS.map(r => r.id); // midi, soir
+
+// Repas non vide le plus proche avant (sens -1) ou après (+1), à un jour d'écart au plus.
+function voisin(iso, cle, sens) {
+  let j = iso, i = ORDRE.indexOf(cle);
+  for (let pas = 0; pas < ORDRE.length * 2 - 1; pas++) {
+    i += sens;
+    if (i < 0) { i = ORDRE.length - 1; j = ajouter(j, -1); }
+    if (i >= ORDRE.length) { i = 0; j = ajouter(j, 1); }
+    const a = D.analyseRepas(j, ORDRE[i]);
+    if (a.mets.length) return { iso: j, cle: ORDRE[i], a };
+  }
+  return null;
+}
+const libelleRepas = (iso, cle) => `${dateCourte(iso)}, ${cle}`;
+const minuscule = s => s.charAt(0).toLowerCase() + s.slice(1);
+
+// Alertes d'un repas : même féculent qu'au repas précédent ; aucun légume (si tous les mets sont renseignés).
+export function alertes(iso, cle) {
+  const a = D.analyseRepas(iso, cle);
+  if (!a.mets.length) return [];
+  const l = [];
+  const avant = voisin(iso, cle, -1);
+  for (const f of a.feculents.filter(f => avant?.a.feculents.includes(f))) {
+    l.push({ texte: `${D.nomIngredient(f)} 2× de suite`, titre: `Aussi au repas précédent (${libelleRepas(avant.iso, avant.cle)})` });
+  }
+  if (a.connu && !a.types.has('legume')) l.push({ texte: 'sans légume', titre: 'Aucun légume parmi les ingrédients de ce repas' });
+  return l;
+}
+
+// Bilan d'une période : féculents par nombre de repas, repas sans légume, repas aux ingrédients inconnus.
+function bilan(debut, nb) {
+  const fec = new Map();
+  let sansLegume = 0, inconnus = 0, renseignes = 0;
+  for (let i = 0; i < nb; i++) {
+    const iso = ajouter(debut, i);
+    for (const cle of ORDRE) {
+      const a = D.analyseRepas(iso, cle);
+      if (!a.mets.length) continue;
+      if (a.renseigne) renseignes++;
+      if (!a.connu) inconnus++;
+      else if (!a.types.has('legume')) sansLegume++;
+      for (const f of a.feculents) fec.set(f, (fec.get(f) || 0) + 1);
+    }
+  }
+  if (!renseignes) return null;
+  const morceaux = [...fec].sort((x, y) => y[1] - x[1]).map(([f, n]) => el('span.ingr.petit.t-feculent', `${D.nomIngredient(f)} ×${n}`));
+  return el('p.bilan',
+    el('span.bilan-titre', 'Féculents'),
+    morceaux.length ? morceaux : el('span.rien', 'aucun'),
+    sansLegume ? el('span.alerte', `${sansLegume} repas sans légume`) : null,
+    inconnus ? el('span.bilan-inconnu', { title: 'Des mets de ces repas n\'ont pas encore d\'ingrédients (onglet Idées)' }, `${inconnus} repas à compléter`) : null
+  );
+}
+
 function cellule(iso, cle, info, ouvrir) {
   const rep = D.repas(iso, cle);
   const facultatif = cle === 'midi' && !info.midiAPrevoir;
@@ -56,7 +112,8 @@ function cellule(iso, cle, info, ouvrir) {
     el('span.repas-contenu',
       plats,
       rep.note ? el('span.note', rep.note) : null,
-      vide ? el('span.a-prevoir', facultatif ? '' : 'à prévoir') : null
+      vide ? el('span.a-prevoir', facultatif ? '' : 'à prévoir') : null,
+      alertes(iso, cle).map(x => el('span.alerte', { title: x.titre }, x.texte))
     )
   );
 }
@@ -125,13 +182,14 @@ export function afficher(racine, rafraichir) {
       const vacs = [...new Set(Array.from({ length: 7 }, (_, i) => vacances(ajouter(d0, i))?.nom).filter(Boolean))];
       grille.append(el('div.semaine',
         el('h3.semaine-tete', `Semaine du ${dateCourte(d0)}`, vacs.map(v => el('span.badge.vacances', v))),
+        bilan(d0, 7),
         el('div.semaine-jours', Array.from({ length: 7 }, (_, i) => carteJour(ajouter(d0, i), ouvrir, true)))
       ));
     }
   } else {
     grille = el('div.grille.semaine-seule', Array.from({ length: 7 }, (_, i) => carteJour(ajouter(debut, i), ouvrir, false)));
   }
-  racine.replaceChildren(barre, resume, legende(), grille);
+  racine.replaceChildren(...[barre, resume, legende(), mois ? null : bilan(debut, 7), grille].filter(Boolean));
 }
 
 // ---------- Éditeur d'un repas ----------
@@ -191,6 +249,17 @@ function editer(iso, cle, rafraichir) {
           dejaLa.length && candidats.some(c => c.groupe === 0) ? 'Autres idées' : null,
           `Jamais servis en ${sv.nom.toLowerCase()}`
         ];
+        // Féculents des repas voisins : signalés si la suggestion en contient aussi.
+        const avant = voisin(jour, repas, -1), apres = voisin(jour, repas, 1);
+        const memeFeculent = id => {
+          const f = D.ingredientsDe(id).filter(x => D.ingredient(x)?.type === 'feculent');
+          const l = [];
+          for (const [v, mot] of [[avant, 'précédent'], [apres, 'suivant']]) {
+            const communs = f.filter(x => v?.a.feculents.includes(x));
+            if (communs.length) l.push(`${communs.map(x => minuscule(D.nomIngredient(x))).join(', ')} au repas ${mot}`);
+          }
+          return l.join(', ');
+        };
         const items = [];
         candidats.forEach(({ p, u, habituel, avec, groupe, dist }, i) => {
           if (titres[groupe] && (i === 0 || candidats[i - 1].groupe !== groupe)) items.push(el('li.separateur' + (groupe === 0 ? '.avec' : ''), titres[groupe]));
@@ -198,7 +267,8 @@ function editer(iso, cle, rafraichir) {
           const detail = [
             avec.length ? avec.map(x => `${x.n}× avec ${D.nomPlat(x.id)}`).join(', ') : null,
             u ? (dist < delai ? '⚠ ' : '') + libelleUsage(u, aujd) : 'jamais servi',
-            groupe === 2 ? `en ${nomHabituel}` : null
+            groupe === 2 ? `en ${nomHabituel}` : null,
+            memeFeculent(p.id) ? `⚠ ${memeFeculent(p.id)}` : null
           ].filter(Boolean).join(' · ');
           items.push(el('li',
             el('button.suggestion' + (dist < delai ? '.proche' : '') + (groupe === 0 ? '.associee' : ''), { type: 'button', onclick: () => ajouterPlat(p) },
@@ -244,6 +314,9 @@ function editer(iso, cle, rafraichir) {
       }));
       const restes = repas === 'midi' && !info.midiAPrevoir && D.estVide(rep)
         ? el('p.aide', 'Midi facultatif ce jour-là (restes).') : null;
+      const alertesRepas = alertes(jour, repas);
+      const equilibre = alertesRepas.length
+        ? el('p.alertes-repas', alertesRepas.map(x => el('span.alerte', { title: x.titre }, x.texte))) : null;
 
       const note = el('input.note-libre', { type: 'text', value: rep.note || '', placeholder: 'Note (facultatif)', maxLength: 80 });
       // Enregistrée à chaque frappe, sans redessiner (pour ne pas perdre le curseur).
@@ -267,6 +340,7 @@ function editer(iso, cle, rafraichir) {
         }, nom))),
         choisis,
         restes,
+        equilibre,
         recherche,
         liste,
         notes,

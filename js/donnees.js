@@ -106,7 +106,15 @@ export const compagnons = id => [...(indexer().get(id)?.compagnons || new Map())
 export const servisAvec = (id, autre, service) => indexer().get(id)?.compagnons.get(autre)?.services[service] || 0;
 
 // ---------- Écriture ----------
-const sansAccent = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '');
+// « Œufs » -> « oeufs » (œ et æ ne se décomposent pas avec NFD).
+const sansAccent = s => s.replace(/œ/g, 'oe').replace(/Œ/g, 'Oe').replace(/æ/g, 'ae').replace(/Æ/g, 'Ae')
+  .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+const versId = (nom, existe, defaut) => {
+  const base = cleRecherche(nom).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || defaut;
+  let id = base, n = 2;
+  while (existe(id)) id = `${base}-${n++}`;
+  return id;
+};
 export const cleRecherche = s => sansAccent(s).toLowerCase().replace(/\s+/g, ' ').trim();
 
 export function trouverPlat(nom) {
@@ -121,9 +129,7 @@ export function ajouterPlat(nom) {
     if (existant.archive) modifierPlat(existant.id, { archive: false });
     return existant;
   }
-  const base = cleRecherche(nom).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'plat';
-  let id = base, n = 2;
-  while (d.plats[id]) id = `${base}-${n++}`;
+  const id = versId(nom, x => d.plats[x], 'plat');
   const p = { id, nom: nom[0].toUpperCase() + nom.slice(1), ingredients: [], maj: maintenant() };
   d.plats[id] = p;
   modifie();
@@ -159,6 +165,54 @@ function ordonnerJour(j) {
   for (const { id } of REPAS) if (j[id]) o[id] = j[id];
   if (j.maj) o.maj = j.maj;
   return o;
+}
+
+// ---------- Ingrédients (facultatifs) ----------
+// Catalogue : { id, nom, type } ; un plat liste les id de ses ingrédients : ingredients: ['riz', 'boeuf'].
+const ordreType = id => { const i = d.types.findIndex(t => t.id === id); return i < 0 ? 99 : i; };
+const triIngr = (a, b) => ordreType(a.type) - ordreType(b.type) || tri(a, b);
+export const ingredient = id => d.ingredients[id];
+export const catalogue = () => Object.values(d.ingredients).sort(triIngr);
+export const nomType = id => d.types.find(t => t.id === id)?.nom || 'Autre';
+export const nomIngredient = id => d.ingredients[id]?.nom || id;
+export const ingredientsDe = id => (d.plats[id]?.ingredients || []).filter(x => typeof x === 'string');
+// Cherche par nom ou par identifiant (« pdt » trouve « Pommes de terre »).
+export function trouverIngredient(texte) {
+  const c = cleRecherche(texte);
+  return Object.values(d.ingredients).find(i => cleRecherche(i.nom) === c || i.id === c);
+}
+export function ajouterIngredient(nom, type) {
+  nom = nom.trim().replace(/\s+/g, ' ');
+  const existant = trouverIngredient(nom);
+  if (existant) return existant;
+  const id = versId(nom, x => d.ingredients[x], 'ingredient');
+  const i = { id, nom: nom[0].toUpperCase() + nom.slice(1), type, maj: maintenant() };
+  d.ingredients[id] = i;
+  modifie();
+  return i;
+}
+export function modifierIngredient(id, patch) {
+  const i = d.ingredients[id];
+  if (!i) return;
+  Object.assign(i, patch, { maj: maintenant() });
+  modifie();
+}
+export const definirIngredients = (platId, ids) => modifierPlat(platId, { ingredients: [...new Set(ids)] });
+export const platsAvecIngredient = id => Object.values(d.plats).filter(p => ingredientsDe(p.id).includes(id)).sort(tri);
+
+// Analyse d'un repas d'après les ingrédients de ses mets (tous services confondus).
+// connu = tous les mets ont des ingrédients renseignés (sinon on ne conclut rien sur les légumes).
+export function analyseRepas(iso, cle) {
+  const r = repas(iso, cle);
+  const mets = SERVICES.flatMap(s => r[s.cle]);
+  const ingr = [...new Set(mets.flatMap(ingredientsDe))];
+  return {
+    mets,
+    connu: mets.length > 0 && mets.every(id => ingredientsDe(id).length),
+    renseigne: ingr.length > 0,
+    feculents: ingr.filter(i => d.ingredients[i]?.type === 'feculent'),
+    types: new Set(ingr.map(i => d.ingredients[i]?.type).filter(Boolean))
+  };
 }
 
 // ---------- Fusion avec des fichiers (dépôt, import) ----------
@@ -219,7 +273,7 @@ function liste(cle, elements) {
 export function versFichiers() {
   const plats = Object.values(d.plats).sort(tri);
   const jours = Object.keys(d.jours).sort().map(k => `    ${ligne(k)}: ${ligne(d.jours[k])}`);
-  const ingr = Object.values(d.ingredients).sort(tri);
+  const ingr = Object.values(d.ingredients).sort(triIngr);
   return {
     'data/plats.json': `{\n  "format": 1,\n${liste('plats', plats)}\n}\n`,
     'data/menus.json': `{\n  "format": 1,\n  "jours": {\n${jours.join(',\n')}${jours.length ? '\n' : ''}  }\n}\n`,
