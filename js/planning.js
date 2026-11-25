@@ -5,6 +5,7 @@ import { vacances, ferie } from './calendrier.js';
 import { el, feuille } from './ui.js';
 
 let decalage = 0; // en jours, par rapport à aujourd'hui
+export const revenirAujourdhui = () => { decalage = 0; };
 const NOTES_RAPIDES = ['Restes', 'Repas dehors', 'Improvisé'];
 
 export function infoJour(iso) {

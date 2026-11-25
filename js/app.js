@@ -19,15 +19,29 @@ const principal = el('main');
 const indicateur = el('button.indicateur', { type: 'button', onclick: sauvegarder });
 const nav = el('nav.onglets');
 app.replaceChildren(
-  el('header.entete', el('h1', el('span.logo', { 'aria-hidden': 'true' }), 'Menus'), nav, indicateur),
+  el('header.entete', el('h1', el('button.accueil', { type: 'button', onclick: accueil, 'aria-label': 'Accueil : menus à partir d\'aujourd\'hui' },
+    el('span.logo', { 'aria-hidden': 'true' }), 'Menus')), nav, indicateur),
   principal
 );
+
+function allerA(id) {
+  onglet = id;
+  history.replaceState(null, '', '#' + id);
+  rafraichir();
+  scrollTo(0, 0);
+}
+
+// Logo : retour à l'accueil (menus à partir d'aujourd'hui).
+function accueil() {
+  Planning.revenirAujourdhui();
+  allerA('planning');
+}
 
 function dessinerEntete() {
   indicateur.hidden = !D.aSauver();
   indicateur.textContent = GH.configure() ? 'Envoyer sur GitHub' : 'À sauvegarder';
   nav.replaceChildren(...ONGLETS.map(o => el('button' + (o.id === onglet ? '.actif' : ''), {
-    type: 'button', onclick: () => { onglet = o.id; history.replaceState(null, '', '#' + o.id); rafraichir(); scrollTo(0, 0); }
+    type: 'button', onclick: () => allerA(o.id)
   }, o.nom)));
 }
 
@@ -43,7 +57,7 @@ function rafraichir() {
 D.surChangement(() => { if (onglet === 'reglages') dessinerEntete(); else rafraichir(); });
 
 async function sauvegarder() {
-  if (!GH.configure()) { onglet = 'reglages'; history.replaceState(null, '', '#reglages'); rafraichir(); return; }
+  if (!GH.configure()) { allerA('reglages'); return; }
   indicateur.disabled = true;
   try { await Reglages.envoyerSurGitHub(); } catch (e) { annonce(e.message || 'Erreur réseau.', 'erreur'); }
   finally { indicateur.disabled = false; }

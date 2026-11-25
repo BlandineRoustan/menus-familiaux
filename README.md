@@ -28,7 +28,7 @@ L'appli travaille sur une copie dans le navigateur, et part des fichiers `data/*
 
 - **Envoyer sur GitHub (direct)** : un commit dans `data/` à chaque envoi. Il faut un jeton personnel, à créer sur GitHub > Settings > Developer settings > Personal access tokens > Fine-grained tokens : accès au seul dépôt `menus-familiaux`, permission « Contents : Read and write ». Colle-le dans Réglages > Sauvegarde ; il reste sur l'appareil (jamais dans le dépôt). À l'ouverture, l'appli récupère aussi le dépôt : on peut alterner téléphone et ordinateur.
 - **Par fichiers** : « Télécharger les 3 fichiers », à déposer dans `data/` puis commit. « Importer » fait l'inverse.
-- **Fusion** : chaque plat et chaque jour porte une date de modification (`maj`) ; à la fusion, la plus récente gagne. Rien n'est perdu en repartant d'un ancien fichier.
+- **Fusion** : chaque idée et chaque repas (midi, soir) porte sa date de modification (`maj`) ; à la fusion, la plus récente gagne, repas par repas. On peut donc remplir le midi sur le téléphone et le soir sur l'ordinateur sans rien perdre, et repartir d'un ancien fichier sans risque. Un repas vidé reste sous la forme `{"maj": …}` pour que l'effacement se propage.
 
 ## Format des fichiers
 
@@ -42,7 +42,7 @@ Une ligne par élément, pour des diffs git lisibles.
 
 `data/menus.json` : les menus, jour par jour (passé = historique). `entrees`, `plats`, `salades`, `desserts` et `note` sont tous facultatifs. Le service n'est pas une propriété du mets : il dépend du menu, si bien qu'une quiche peut être une entrée un jour et un plat un autre.
 ```json
-"2026-11-25": {"midi": {"note": "Restes"}, "soir": {"entrees": ["carottes-rapees"], "plats": ["bourguignon"], "desserts": ["compote"]}, "maj": "…"}
+"2026-11-25": {"midi": {"note": "Restes", "maj": "…"}, "soir": {"entrees": ["carottes-rapees"], "plats": ["bourguignon"], "desserts": ["compote"], "maj": "…"}, "maj": "…"}
 ```
 
 `data/ingredients.json` : types d'ingrédients (féculent, légume, protéine…) et ingrédients, pour la v2 (équilibre des féculents, liste de courses).

@@ -139,22 +139,26 @@ export function modifierPlat(id, patch) {
 }
 
 // valeur : { entrees, plats, salades, desserts, note } (parties absentes = vides).
+// Chaque repas porte sa propre date « maj » : on peut remplir le midi sur un appareil et le soir
+// sur un autre, la fusion garde les deux. Un repas vidé reste sous la forme { maj } pour que
+// l'effacement se propage. Le jour garde aussi un « maj » (date de sa dernière modification).
 export function definirRepas(iso, cle, valeur) {
   const ancien = d.jours[iso] || {};
   const r = {};
   for (const s of SERVICES) if (valeur[s.cle]?.length) r[s.cle] = valeur[s.cle];
   const note = (valeur.note || '').trim();
   if (note) r.note = note;
-  // Ordre fixe des clés (midi, soir, maj) pour des fichiers stables.
-  // Un jour vidé est gardé (avec sa date) pour que la suppression se propage à la fusion.
-  const j = {};
-  for (const { id } of REPAS) {
-    const v = id === cle ? r : ancien[id];
-    if (v && Object.keys(v).length) j[id] = v;
-  }
-  j.maj = maintenant();
-  d.jours[iso] = j;
+  r.maj = maintenant();
+  d.jours[iso] = ordonnerJour({ ...ancien, [cle]: r, maj: r.maj });
   modifie();
+}
+
+// Ordre fixe des clés (midi, soir, maj) pour des fichiers stables.
+function ordonnerJour(j) {
+  const o = {};
+  for (const { id } of REPAS) if (j[id]) o[id] = j[id];
+  if (j.maj) o.maj = j.maj;
+  return o;
 }
 
 // ---------- Fusion avec des fichiers (dépôt, import) ----------
@@ -162,6 +166,29 @@ function fusionnerTable(locale, entrante) {
   let change = false;
   for (const [k, v] of Object.entries(entrante || {})) {
     if (!locale[k] || (v.maj || '') > (locale[k].maj || '')) { locale[k] = v; change = true; }
+  }
+  return change;
+}
+
+// Jours : fusion repas par repas (le plus récent gagne pour chaque repas).
+// Ancien format (repas sans « maj ») : le repas prend la date du jour, et un repas absent d'un jour
+// plus récent compte comme effacé.
+function fusionnerJours(locale, entrante) {
+  let change = false;
+  for (const [iso, jE] of Object.entries(entrante || {})) {
+    const jL = locale[iso];
+    if (!jL) { locale[iso] = jE; change = true; continue; }
+    const ancienFormat = REPAS.every(({ id }) => !jE[id]?.maj);
+    const nouveau = { ...jL };
+    let ici = false;
+    for (const { id } of REPAS) {
+      const mE = jE[id], mL = jL[id];
+      const tE = mE?.maj || jE.maj || '', tL = mL?.maj || jL.maj || '';
+      if (mE && tE > tL) { nouveau[id] = mE.maj ? mE : { ...mE, maj: tE }; ici = true; }
+      else if (!mE && mL && ancienFormat && tE > tL) { nouveau[id] = { maj: tE }; ici = true; }
+    }
+    if ((jE.maj || '') > (jL.maj || '')) { nouveau.maj = jE.maj; ici = true; }
+    if (ici) { locale[iso] = ordonnerJour(nouveau); change = true; }
   }
   return change;
 }
@@ -174,7 +201,7 @@ export function fusionner(fichiers, aSauver = false) {
   for (const f of Object.values(fichiers)) {
     if (!f || typeof f !== 'object') continue;
     if (Array.isArray(f.plats)) change = fusionnerTable(d.plats, parId(f.plats)) || change;
-    if (f.jours) change = fusionnerTable(d.jours, f.jours) || change;
+    if (f.jours) change = fusionnerJours(d.jours, f.jours) || change;
     if (Array.isArray(f.ingredients)) change = fusionnerTable(d.ingredients, parId(f.ingredients)) || change;
     if (Array.isArray(f.types) && f.types.length && JSON.stringify(f.types) !== JSON.stringify(d.types)) {
       d.types = f.types; change = true;
