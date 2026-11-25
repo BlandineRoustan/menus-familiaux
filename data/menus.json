@@ -1,11 +1,24 @@
 {
   "format": 1,
   "jours": {
-    "2026-11-25": {"midi":{"plats":["hachis-parmentier"]},"soir":{"plats":["chou-fleur-a-la-flamande"]},"maj":"2026-11-25T11:00:12.152Z"},
+    "2026-11-25": {"midi":{"plats":["hachis-parmentier"]},"soir":{"entrees":["soupe"],"plats":["chou-fleur-a-la-flamande"],"maj":"2026-11-25T14:59:01.608Z"},"maj":"2026-11-25T14:59:01.608Z"},
     "2026-11-26": {"soir":{"plats":["chili-con-carne"]},"maj":"2026-11-25T11:04:19.422Z"},
     "2026-11-27": {"soir":{"plats":["pizza-jambon-fromages","pizza-blanche-lardons-raclette"]},"maj":"2026-11-25T11:01:34.555Z"},
-    "2026-11-28": {"midi":{"plats":["filet-mignon-miel-thym-pommes","sarrasin"]},"maj":"2026-11-25T11:02:15.716Z"},
+    "2026-11-28": {"midi":{"plats":["filet-mignon-miel-thym-pommes","sarrasin"]},"soir":{"plats":["stifado-grec"],"maj":"2026-11-25T15:00:33.766Z"},"maj":"2026-11-25T15:00:33.766Z"},
     "2026-11-29": {"midi":{"plats":["poulet-roti","haricots"]},"soir":{"plats":["ufs-a-la-coque"],"salades":["fromage"]},"maj":"2026-11-25T11:03:20.870Z"},
-    "2026-11-30": {"soir":{"plats":["gougere","poireaux-lardons"]},"maj":"2026-11-25T11:04:01.059Z"}
+    "2026-11-30": {"soir":{"plats":["gougere","poireaux-lardons"]},"maj":"2026-11-25T11:04:01.059Z"},
+    "2026-12-01": {"midi":{"plats":["potimarron-farci-chatasaint-nectaire-lardons"],"maj":"2026-11-25T15:01:54.288Z"},"maj":"2026-11-25T15:01:54.288Z"},
+    "2026-12-03": {"soir":{"plats":["potee-chou"],"maj":"2026-11-25T15:02:24.990Z"},"maj":"2026-11-25T15:02:24.990Z"},
+    "2026-12-04": {"midi":{"maj":"2026-11-25T15:03:04.152Z"},"soir":{"plats":["pates-bolo"],"maj":"2026-11-25T15:03:06.840Z"},"maj":"2026-11-25T15:03:06.840Z"},
+    "2026-12-05": {"midi":{"plats":["lentilles-saucisse"],"maj":"2026-11-25T15:03:00.235Z"},"maj":"2026-11-25T15:03:00.235Z"},
+    "2026-12-06": {"soir":{"plats":["galettes"],"maj":"2026-11-25T15:03:24.831Z"},"maj":"2026-11-25T15:03:24.831Z"},
+    "2026-12-07": {"soir":{"plats":["tarte-quiche"],"maj":"2026-11-25T15:03:47.532Z"},"maj":"2026-11-25T15:03:47.532Z"},
+    "2026-12-08": {"soir":{"plats":["crumble-volaille"],"maj":"2026-11-25T15:04:04.648Z"},"maj":"2026-11-25T15:04:04.648Z"},
+    "2026-12-09": {"midi":{"plats":["poisson-pane","riz"],"maj":"2026-11-25T15:04:20.728Z"},"maj":"2026-11-25T15:04:20.728Z"},
+    "2026-12-10": {"soir":{"plats":["dauphinois-pdt"],"maj":"2026-11-25T15:04:41.562Z"},"maj":"2026-11-25T15:04:41.562Z"},
+    "2026-12-12": {"midi":{"plats":["poulet-curry-coco"],"maj":"2026-11-25T15:04:58.885Z"},"maj":"2026-11-25T15:04:58.885Z"},
+    "2026-12-13": {"midi":{"plats":["rougail-saucisse"],"maj":"2026-11-25T15:05:08.608Z"},"maj":"2026-11-25T15:05:08.608Z"},
+    "2026-12-16": {"midi":{"plats":["puree-saucisse"],"maj":"2026-11-25T15:06:05.424Z"},"maj":"2026-11-25T15:06:05.424Z"},
+    "2026-12-17": {"midi":{"plats":["galettes"],"maj":"2026-11-25T15:06:13.991Z"},"maj":"2026-11-25T15:06:13.991Z"}
   }
 }
