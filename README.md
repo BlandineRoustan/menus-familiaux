@@ -12,7 +12,7 @@ Mise à jour du code : les changements apparaissent au 2e lancement (ou augmente
 
 ## Utilisation
 
-- **Menus** : à partir d'aujourd'hui, en vue **Semaine** (7 jours) ou **4 semaines**. Les flèches avancent ou reculent (on retrouve ainsi l'historique). Chaque jour affiche son nom (lundi, mardi…) et sa date.
+- **Menus** : à partir du lundi de la semaine en cours, en vue **Semaine** (7 jours) ou **4 semaines**. Les flèches avancent ou reculent (on retrouve ainsi l'historique). Chaque jour affiche son nom (lundi, mardi…) et sa date. Sur téléphone (affichage en colonne), les jours passés sont repliés : toucher leur en-tête les déplie. Le compteur « repas prévus » part d'aujourd'hui.
   - Touche un repas pour l'éditer. Il a quatre lignes, toutes facultatives : **Entrée**, **Plat**, **Salade**, **Dessert**. Choisis la ligne, puis cherche dans les idées ou tape un nouveau nom et Entrée pour l'ajouter aux idées. Plusieurs mets par ligne possibles, plus une note (« Restes », « Repas dehors »…). Les flèches de l'éditeur passent au jour précédent / suivant : pratique pour remplir 4 semaines d'affilée.
   - Dans le planning, les mets s'affichent dans l'ordre entrée, plat, salade, dessert, avec une couleur par service : moutarde (entrée), vert sapin (plat), vert tendre (salade), rose poudré (dessert).
   - **Souvent avec…** : dès qu'un mets est choisi, les suggestions commencent par ce qui a déjà accompagné ce mets dans le service sélectionné, calculé sur les menus existants (ex. Bourguignon → Pommes de terre vapeur 2×, Riz 1× ; Pizza → Salade verte en salade). Plus on remplit de menus, plus c'est pertinent.

@@ -112,6 +112,24 @@ main { max-width: 1180px; margin: 0 auto; padding: 16px; }
 .jour.en-vacances { background: var(--peche); border-color: var(--peche-bord); box-shadow: inset 0 4px 0 var(--orange-doux); }
 .jour.aujourdhui { border: 2px solid var(--sapin); }
 .jour.passe { opacity: .68; }
+/* Jours passés repliés (affichage en colonne, sur téléphone) : seul l'en-tête reste, il sert à déplier. */
+.deplier { display: none; }
+@media (max-width: 699.98px) {
+  .semaine-seule .jour.passe .jour-tete { cursor: pointer; margin: 0; }
+  .semaine-seule .jour.passe .deplier { display: inline-block; }
+  .semaine-seule .jour.replie .jour-repas { display: none; }
+  .semaine-seule .jour.replie { padding-top: 6px; padding-bottom: 6px; }
+}
+@media (max-width: 899.98px) {
+  .mois .jour.passe .jour-tete { cursor: pointer; }
+  .mois .jour.passe .deplier { display: inline-block; }
+  .mois .jour.replie { display: block; }
+  .mois .jour.replie .jour-tete { flex-direction: row; align-items: baseline; gap: 6px; padding: 0; }
+  .mois .jour.replie .jour-repas { display: none; }
+}
+.deplier { margin-left: auto; align-self: center; border: 0; background: none; color: var(--texte-doux); width: 28px; height: 24px; padding: 0; font-size: .9rem; }
+.deplier::before { content: '▾'; }
+.deplier[aria-expanded="true"]::before { content: '▴'; }
 .jour-tete { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; margin-bottom: 4px; }
 .jour-nom { font: 600 1.15rem var(--serif); color: var(--sapin); }
 .jour-date { color: var(--texte-doux); }
@@ -159,7 +177,11 @@ main { max-width: 1180px; margin: 0 auto; padding: 16px; }
 .mois .jour-repas { gap: 0; }
 .mois .repas { padding: 4px 6px; font-size: .92rem; }
 .mois .repas.facultatif.vide { display: none; }
-.mois .jour:hover .repas.facultatif.vide, .mois .jour:focus-within .repas.facultatif.vide { display: flex; }
+/* Midi facultatif révélé au survol, seulement avec une souris : sur téléphone, le toucher « survole »
+   le jour, le midi apparaît sous le doigt et c'est lui qui recevait le clic au lieu du soir. */
+@media (hover: hover) {
+  .mois .jour:hover .repas.facultatif.vide, .mois .jour:focus-within .repas.facultatif.vide { display: flex; }
+}
 
 @media (min-width: 900px) {
   .semaine-jours { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
@@ -169,6 +191,8 @@ main { max-width: 1180px; margin: 0 auto; padding: 16px; }
   .mois .repas-nom { flex: none; font-size: .68rem; }
   .mois .repas.facultatif.vide { display: flex; visibility: hidden; }
   .mois .jour:hover .repas.facultatif.vide { visibility: visible; }
+}
+@media (min-width: 900px) and (hover: hover) {
   .mois .repas-contenu .mets { padding: 1px 8px; font-size: .88rem; }
 }
 

@@ -1,11 +1,14 @@
-// Planning : vue semaine (7 jours) ou 4 semaines, à partir d'aujourd'hui, et éditeur d'un repas.
+// Planning : vue semaine (7 jours) ou 4 semaines, à partir du lundi de la semaine en cours, et éditeur d'un repas.
 import * as D from './donnees.js';
 import { aujourdhui, ajouter, ecart, jourSemaine, dateLongue, dateCourte, nomJour, nomJourCourt } from './dates.js';
 import { vacances, ferie } from './calendrier.js';
 import { el, feuille } from './ui.js';
 
-let decalage = 0; // en jours, par rapport à aujourd'hui
+let decalage = 0; // en jours, par rapport au lundi de la semaine en cours
 export const revenirAujourdhui = () => { decalage = 0; };
+const lundi = iso => ajouter(iso, -jourSemaine(iso));
+// Jours passés dépliés à la main (sur téléphone, ils sont repliés : on ne voit que leur en-tête).
+const deplies = new Set();
 const NOTES_RAPIDES = ['Restes', 'Repas dehors', 'Improvisé'];
 
 export function infoJour(iso) {
@@ -125,30 +128,44 @@ function carteJour(iso, ouvrir, compact) {
     info.fer ? el('span.badge.ferie', info.fer) : null,
     info.vac && !compact ? el('span.badge.vacances', info.vac.nom) : null
   ];
-  return el('section.jour' + (iso === aujd ? '.aujourdhui' : '') + (iso < aujd ? '.passe' : '')
-    + (info.vac ? '.en-vacances' : '') + (jourSemaine(iso) >= 5 ? '.week-end' : ''), { dataset: { iso } },
-    el('header.jour-tete',
+  const passe = iso < aujd;
+  const carte = el('section.jour' + (iso === aujd ? '.aujourdhui' : '') + (passe ? '.passe' : '') + (passe && !deplies.has(iso) ? '.replie' : '')
+    + (info.vac ? '.en-vacances' : '') + (jourSemaine(iso) >= 5 ? '.week-end' : ''), { dataset: { iso } });
+  // Jour passé : l'en-tête replie ou déplie le jour (visible seulement en colonne, sur téléphone).
+  const deplier = passe ? el('button.deplier', { type: 'button', 'aria-label': 'Afficher ou masquer les repas de ce jour' }) : null;
+  const basculer = () => {
+    const replie = carte.classList.toggle('replie');
+    if (replie) deplies.delete(iso); else deplies.add(iso);
+    deplier.setAttribute('aria-expanded', String(!replie));
+  };
+  deplier?.setAttribute('aria-expanded', String(deplies.has(iso)));
+  carte.append(
+    el('header.jour-tete', passe ? { onclick: basculer } : {},
       el('span.jour-nom', compact ? nomJourCourt(iso) : nomJour(iso)),
       el('span.jour-date', dateCourte(iso)),
       iso === aujd ? el('span.badge.jour-j', 'aujourd\'hui') : null,
-      badges
+      badges,
+      deplier
     ),
     el('div.jour-repas', D.REPAS.map(({ id }) => cellule(iso, id, info, ouvrir)))
   );
+  return carte;
 }
 
 export function afficher(racine, rafraichir) {
   const r = D.reglages();
   const mois = r.vue === 'mois';
   const nb = mois ? 28 : 7;
-  const debut = ajouter(aujourdhui(), decalage);
+  const aujd = aujourdhui();
+  const debut = ajouter(lundi(aujd), decalage);
   const fin = ajouter(debut, nb - 1);
   const ouvrir = (iso, cle) => editer(iso, cle, rafraichir);
 
-  // Compteur : repas « à prévoir » déjà remplis sur la période.
+  // Compteur : repas « à prévoir » déjà remplis sur la période, à partir d'aujourd'hui.
   let prevus = 0, total = 0;
   for (let i = 0; i < nb; i++) {
     const iso = ajouter(debut, i);
+    if (iso < aujd) continue;
     const info = infoJour(iso);
     for (const { id } of D.REPAS) {
       const rempli = !D.estVide(D.repas(iso, id));
