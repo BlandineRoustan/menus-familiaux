@@ -13,6 +13,12 @@
   --peche: #fbe6d3;
   --peche-bord: #f0cba9;
   --abricot: #fdf5ea;
+  --entree: #8a6410;
+  --entree-pale: #f6ecd2;
+  --salade: #3d7a35;
+  --salade-pale: #e2f1dc;
+  --dessert: #9a4560;
+  --dessert-pale: #f7e1e6;
   --rayon: 14px;
   --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
   --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -117,9 +123,17 @@ main { max-width: 1180px; margin: 0 auto; padding: 16px; }
 .repas:hover { background: rgba(31, 77, 58, .06); }
 .repas-nom { flex: 0 0 38px; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--texte-doux); font-weight: 600; }
 .repas-contenu { display: flex; flex-wrap: wrap; gap: 5px; align-items: baseline; min-width: 0; }
-.plat { background: var(--sapin-pale); color: var(--sapin); padding: 2px 10px; border-radius: 999px; font-weight: 500; }
-.plat.repete { background: #fbdcc6; color: #8a3d14; }
-.plat.repete::before { content: "↻ "; }
+/* Un mets, coloré selon le service : entrée (moutarde), plat (sapin), salade (vert tendre), dessert (rose poudré). */
+.mets { background: var(--fond-s); color: var(--texte-s); padding: 2px 10px; border-radius: 999px; font-weight: 500; border: 1px solid transparent; }
+.m-entree { --fond-s: var(--entree-pale); --texte-s: var(--entree); }
+.m-plat { --fond-s: var(--sapin-pale); --texte-s: var(--sapin); }
+.m-salade { --fond-s: var(--salade-pale); --texte-s: var(--salade); }
+.m-dessert { --fond-s: var(--dessert-pale); --texte-s: var(--dessert); }
+.mets.repete { border: 1px dashed var(--orange); }
+.mets.repete::before { content: "↻ "; color: var(--orange); }
+.mets.petit { font-size: .75rem; padding: 0 8px; }
+.legende { display: flex; flex-wrap: wrap; gap: 6px; margin: -4px 2px 12px; font-size: .78rem; }
+.legende .mets { padding: 0 8px; }
 .note { font-style: italic; color: var(--texte-doux); }
 .a-prevoir { color: var(--orange); font-size: .9rem; }
 .repas.vide:not(.facultatif) { border: 1px dashed var(--orange-doux); }
@@ -154,7 +168,7 @@ main { max-width: 1180px; margin: 0 auto; padding: 16px; }
   .mois .repas-nom { flex: none; font-size: .68rem; }
   .mois .repas.facultatif.vide { display: flex; visibility: hidden; }
   .mois .jour:hover .repas.facultatif.vide { visibility: visible; }
-  .mois .plat { padding: 1px 8px; font-size: .88rem; }
+  .mois .repas-contenu .mets { padding: 1px 8px; font-size: .88rem; }
 }
 
 /* ---------- Feuille (éditeur) ---------- */
@@ -170,11 +184,37 @@ main { max-width: 1180px; margin: 0 auto; padding: 16px; }
 .feuille-tete > div { flex: 1; }
 .feuille h2 { margin: 0; font: 600 1.3rem var(--serif); color: var(--sapin); }
 .sous-titre { margin: 2px 0 0; color: var(--orange); font-size: .9rem; min-height: 1.2em; }
-.feuille-pied { display: flex; justify-content: space-between; gap: 8px; }
+.feuille-pied { display: flex; justify-content: space-between; gap: 8px; position: sticky; bottom: 0; background: var(--carte); padding: 8px 0 calc(4px + env(safe-area-inset-bottom)); margin-bottom: calc(-16px - env(safe-area-inset-bottom)); }
 .feuille-pied .principal { margin-left: auto; }
 
-.choisis { display: flex; flex-wrap: wrap; gap: 6px; min-height: 36px; align-items: center; }
-.puce { display: inline-flex; align-items: center; gap: 4px; background: var(--sapin); color: #fff; border-radius: 999px; padding: 5px 6px 5px 14px; font-weight: 500; }
+.services { display: flex; flex-direction: column; gap: 4px; }
+.service {
+  display: flex; align-items: center; gap: 10px; min-height: 46px; padding: 6px 10px;
+  border: 1px solid var(--bord); border-radius: 12px; background: #fff; cursor: pointer;
+}
+.service.actif { border: 2px solid var(--texte-s); background: var(--fond-s); padding: 5px 9px; }
+.s-entree { --fond-s: var(--entree-pale); --texte-s: var(--entree); }
+.s-plat { --fond-s: var(--sapin-pale); --texte-s: var(--sapin); }
+.s-salade { --fond-s: var(--salade-pale); --texte-s: var(--salade); }
+.s-dessert { --fond-s: var(--dessert-pale); --texte-s: var(--dessert); }
+.service-nom { flex: 0 0 64px; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; font-weight: 700; color: var(--texte-s); }
+.service-mets { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.service .rien { font-size: .9rem; }
+.puce { display: inline-flex; align-items: center; gap: 4px; background: var(--texte-s, var(--sapin)); color: #fff; border-radius: 999px; padding: 4px 5px 4px 12px; font-weight: 500; }
+.pastille { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--texte-s); margin-right: 8px; vertical-align: 1px; }
+.separateur { font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; color: var(--texte-doux); margin: 8px 2px 2px; }
+.filtres { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.filtres .puce-note.actif { background: var(--sapin); border-color: var(--sapin); color: #fff; }
+.filtres .f-entree.actif { background: var(--entree); border-color: var(--entree); }
+.filtres .f-salade.actif { background: var(--salade); border-color: var(--salade); }
+.filtres .f-dessert.actif { background: var(--dessert); border-color: var(--dessert); }
+.separateur.avec { color: var(--orange); }
+.suggestion.associee { border-color: var(--orange-doux); }
+.compagnons h3 { margin: 0 0 6px; font-size: .95rem; color: var(--sapin); }
+.compagnons .mets b { font-weight: 700; opacity: .7; }
+.idee-gauche { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
+.badges-services { display: flex; flex-wrap: wrap; gap: 4px; }
+.historique li .mets { margin-left: 4px; }
 .puce button { border: 0; background: rgba(255, 255, 255, .18); color: #fff; width: 26px; height: 26px; border-radius: 50%; line-height: 1; }
 .rien { color: var(--texte-doux); font-style: italic; }
 

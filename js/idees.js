@@ -5,6 +5,27 @@ import { el, feuille, annonce } from './ui.js';
 
 let filtre = '';
 let ordre = 'alpha'; // 'alpha' | 'oubli' (les moins récemment servis d'abord)
+let service = '';    // '' = tous | id d'un service (entree, plat…) | 'aucun' (jamais servi)
+
+// Pastilles « Entrée 3 · Plat 1 » : comment le mets a été servi jusqu'ici.
+function badgesServices(id) {
+  const sv = D.services(id);
+  const l = D.SERVICES.filter(s => sv[s.id]).map(s => el(`span.mets.petit.m-${s.id}`, `${s.nom} ${sv[s.id]}`));
+  return l.length ? el('span.badges-services', l) : null;
+}
+// « Souvent servi avec » : les mets des mêmes repas, colorés selon le service où ils l'ont accompagné.
+function compagnonsDe(id) {
+  const l = D.compagnons(id).slice(0, 10);
+  if (!l.length) return null;
+  return el('div.compagnons',
+    el('h3', 'Souvent servi avec'),
+    el('div.badges-services', l.map(c => {
+      const s = D.SERVICES.reduce((m, x) => c.services[x.id] > c.services[m.id] ? x : m, D.SERVICES[0]);
+      return el(`span.mets.m-${s.id}`, { title: `${c.n} repas ensemble` }, `${D.nomPlat(c.id)} `, el('b', `×${c.n}`));
+    }))
+  );
+}
+const total = sv => Object.values(sv).reduce((a, b) => a + b, 0);
 
 function resumeUsage(id, aujd) {
   const u = D.usages(id);
@@ -34,12 +55,14 @@ export function afficher(racine) {
   const remplir = () => {
     const q = D.cleRecherche(champ.value);
     let plats = D.platsActifs().filter(p => !q || D.cleRecherche(p.nom).includes(q));
+    if (service === 'aucun') plats = plats.filter(p => !total(D.services(p.id)));
+    else if (service) plats = plats.filter(p => D.services(p.id)[service] > 0);
     if (ordre === 'oubli') {
       const dernier = id => D.usages(id).filter(x => x <= aujd).pop() || '';
       plats = plats.sort((a, b) => dernier(a.id).localeCompare(dernier(b.id)));
     }
     const items = plats.map(p => el('li', el('button.idee', { type: 'button', onclick: () => fiche(p.id) },
-      el('span.nom', p.nom),
+      el('span.idee-gauche', el('span.nom', p.nom), badgesServices(p.id)),
       el('small', resumeUsage(p.id, aujd))
     )));
     const nom = champ.value.trim();
@@ -62,9 +85,20 @@ export function afficher(racine) {
     el('option', { value: 'oubli', selected: ordre === 'oubli' }, 'À ressortir (les plus anciens)')
   );
 
+  const filtres = el('div.filtres', { role: 'group', 'aria-label': 'Service' },
+    [['', 'Toutes'], ...D.SERVICES.map(s => [s.id, s.pluriel]), ['aucun', 'Jamais servies']].map(([v, t]) => {
+      const b = el('button.puce-note' + (v ? `.f-${v}` : '') + (service === v ? '.actif' : ''), { type: 'button', onclick: () => {
+        service = v;
+        filtres.querySelectorAll('button').forEach(x => x.classList.toggle('actif', x === b));
+        remplir();
+      } }, t);
+      return b;
+    }));
+
   remplir();
   racine.replaceChildren(
     el('div.barre-idees', champ, tri),
+    filtres,
     el('p.resume', el('span', `${D.platsActifs().length} idées`)),
     liste,
     archives
@@ -84,13 +118,17 @@ function fiche(id) {
       D.modifierPlat(id, { nom: v });
     };
     nom.addEventListener('change', valider);
-    const dates = [...D.usages(id)].reverse();
+    const occ = [...D.occurrences(id)].reverse();
     dlg.append(el('div.feuille-contenu',
-      el('header.feuille-tete', el('div', el('h2', 'Idée de plat'), el('p.sous-titre', resumeUsage(id, aujd)))),
+      el('header.feuille-tete', el('div', el('h2', 'Idée'), el('p.sous-titre', resumeUsage(id, aujd)))),
       el('label.champ', el('span', 'Nom'), nom),
-      dates.length ? el('div.historique',
+      badgesServices(id),
+      compagnonsDe(id),
+      occ.length ? el('div.historique',
         el('h3', 'Historique'),
-        el('ul', dates.slice(0, 40).map(x => el('li' + (x > aujd ? '.futur' : ''), dateLongue(x))))
+        el('ul', occ.slice(0, 40).map(o => el('li' + (o.iso > aujd ? '.futur' : ''),
+          `${dateLongue(o.iso)}, ${o.repas} `,
+          el(`span.mets.petit.m-${o.service}`, D.SERVICES.find(s => s.id === o.service).nom))))
       ) : el('p.rien', 'Pas encore utilisé dans un menu.'),
       el('p.aide', 'Ingrédients et types (féculents…) : prévus pour une prochaine version, la structure des données est prête.'),
       el('footer.feuille-pied',

@@ -46,26 +46,64 @@ export const types = () => d.types;
 const tri = (a, b) => a.nom.localeCompare(b.nom, 'fr', { sensitivity: 'base' });
 export const platsActifs = () => Object.values(d.plats).filter(p => !p.archive).sort(tri);
 export const platsArchives = () => Object.values(d.plats).filter(p => p.archive).sort(tri);
-export const repas = (iso, cle) => d.jours[iso]?.[cle] || { plats: [], note: '' };
+// Un repas : { entrees: [ids], plats: [ids], salades: [ids], desserts: [ids], note }. Chaque partie est facultative.
+// Pour ajouter un service : une ligne ici, et ses couleurs (.m-…, .s-…, .f-…) dans css/style.css.
+export const SERVICES = [
+  { id: 'entree', cle: 'entrees', nom: 'Entrée', pluriel: 'Entrées' },
+  { id: 'plat', cle: 'plats', nom: 'Plat', pluriel: 'Plats' },
+  { id: 'salade', cle: 'salades', nom: 'Salade', pluriel: 'Salades' },
+  { id: 'dessert', cle: 'desserts', nom: 'Dessert', pluriel: 'Desserts' }
+];
+export function repas(iso, cle) {
+  const r = d.jours[iso]?.[cle] || {};
+  return { ...Object.fromEntries(SERVICES.map(s => [s.cle, r[s.cle] || []])), note: r.note || '' };
+}
+export const estVide = r => !r.note && SERVICES.every(s => !r[s.cle].length);
 export const nomPlat = id => d.plats[id]?.nom || id;
 
-// Index des usages : id du plat -> dates (triées) où il est prévu ou a été servi.
+// Index des usages : id du plat -> {
+//   dates (triées, tous services), occurrences ({ iso, repas, service }), services ({ entree: n, plat: n, … }),
+//   compagnons : Map(id d'un autre mets -> { n, services }) = servis dans le même repas, et dans quel service.
+// }
+const compteursVides = () => Object.fromEntries(SERVICES.map(s => [s.id, 0]));
 let index = null;
-export function usages(id) {
-  if (!index) {
-    index = new Map();
-    for (const [iso, j] of Object.entries(d.jours)) {
-      for (const { id: cle } of REPAS) {
-        for (const p of j[cle]?.plats || []) {
-          if (!index.has(p)) index.set(p, []);
-          index.get(p).push(iso);
+function indexer() {
+  if (index) return index;
+  index = new Map();
+  const entree = p => {
+    if (!index.has(p)) index.set(p, { dates: [], occurrences: [], services: compteursVides(), compagnons: new Map() });
+    return index.get(p);
+  };
+  for (const [iso, j] of Object.entries(d.jours)) {
+    for (const { id: cle } of REPAS) {
+      const mets = SERVICES.flatMap(s => (j[cle]?.[s.cle] || []).map(p => ({ p, s: s.id })));
+      for (const { p, s } of mets) {
+        const u = entree(p);
+        u.dates.push(iso);
+        u.occurrences.push({ iso, repas: cle, service: s });
+        u.services[s]++;
+        for (const autre of mets) {
+          if (autre.p === p) continue;
+          if (!u.compagnons.has(autre.p)) u.compagnons.set(autre.p, { n: 0, services: compteursVides() });
+          const c = u.compagnons.get(autre.p);
+          c.n++;
+          c.services[autre.s]++;
         }
       }
     }
-    for (const l of index.values()) l.sort();
   }
-  return index.get(id) || [];
+  for (const u of index.values()) { u.dates.sort(); u.occurrences.sort((a, b) => a.iso.localeCompare(b.iso)); }
+  return index;
 }
+export const occurrences = id => indexer().get(id)?.occurrences || [];
+export const usages = id => indexer().get(id)?.dates || [];
+export const services = id => indexer().get(id)?.services || compteursVides();
+// Mets servis dans les mêmes repas que celui-ci, du plus fréquent au moins fréquent : [{ id, n, services }].
+export const compagnons = id => [...(indexer().get(id)?.compagnons || new Map())]
+  .map(([autre, c]) => ({ id: autre, ...c }))
+  .sort((a, b) => b.n - a.n || nomPlat(a.id).localeCompare(nomPlat(b.id), 'fr'));
+// Combien de fois « autre » a été servi en tant que « service » dans un repas contenant « id ».
+export const servisAvec = (id, autre, service) => indexer().get(id)?.compagnons.get(autre)?.services[service] || 0;
 
 // ---------- Écriture ----------
 const sansAccent = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '');
@@ -100,12 +138,21 @@ export function modifierPlat(id, patch) {
   modifie();
 }
 
-export function definirRepas(iso, cle, { plats = [], note = '' }) {
-  const j = d.jours[iso] || {};
-  note = note.trim();
-  if (plats.length || note) j[cle] = note ? { plats, note } : { plats };
-  else delete j[cle];
-  j.maj = maintenant(); // un jour vidé est gardé (avec sa date) pour que la suppression se propage
+// valeur : { entrees, plats, salades, desserts, note } (parties absentes = vides).
+export function definirRepas(iso, cle, valeur) {
+  const ancien = d.jours[iso] || {};
+  const r = {};
+  for (const s of SERVICES) if (valeur[s.cle]?.length) r[s.cle] = valeur[s.cle];
+  const note = (valeur.note || '').trim();
+  if (note) r.note = note;
+  // Ordre fixe des clés (midi, soir, maj) pour des fichiers stables.
+  // Un jour vidé est gardé (avec sa date) pour que la suppression se propage à la fusion.
+  const j = {};
+  for (const { id } of REPAS) {
+    const v = id === cle ? r : ancien[id];
+    if (v && Object.keys(v).length) j[id] = v;
+  }
+  j.maj = maintenant();
   d.jours[iso] = j;
   modifie();
 }
