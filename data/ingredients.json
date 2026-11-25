@@ -1,0 +1,13 @@
+{
+  "format": 1,
+  "types": [
+    {"id": "feculent", "nom": "Féculent"},
+    {"id": "legume", "nom": "Légume"},
+    {"id": "proteine", "nom": "Protéine"},
+    {"id": "laitier", "nom": "Produit laitier"},
+    {"id": "fruit", "nom": "Fruit"},
+    {"id": "autre", "nom": "Autre"}
+  ],
+  "ingredients": [
+  ]
+}

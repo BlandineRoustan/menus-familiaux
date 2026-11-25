@@ -1,0 +1,7 @@
+{
+  "format": 1,
+  "plats": [
+    {"id": "bourguignon", "nom": "Bourguignon", "ingredients": [], "maj": "2026-11-25T00:00:00.000Z"},
+    {"id": "pates-carbo", "nom": "Pâtes carbo", "ingredients": [], "maj": "2026-11-25T00:00:00.000Z"}
+  ]
+}
