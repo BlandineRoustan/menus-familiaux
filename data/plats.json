@@ -1,7 +1,8 @@
 {
   "format": 1,
   "plats": [
-    {"id": "bourguignon", "nom": "Bourguignon", "ingredients": [], "maj": "2026-11-25T00:00:00.000Z"},
-    {"id": "pates-carbo", "nom": "Pâtes carbo", "ingredients": [], "maj": "2026-11-25T00:00:00.000Z"}
+    {"id":"bourguignon","nom":"Bourguignon","ingredients":[],"maj":"2026-11-25T00:00:00.000Z"},
+    {"id":"hachis-parmentier","nom":"Hachis parmentier","ingredients":[],"maj":"2026-11-25T10:16:59.708Z"},
+    {"id":"pates-carbo","nom":"Pâtes carbo","ingredients":[],"maj":"2026-11-25T00:00:00.000Z"}
   ]
 }
